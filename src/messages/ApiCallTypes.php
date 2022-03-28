@@ -8,6 +8,10 @@
 
 namespace hotelbeds\hotel_api_sdk\messages;
 
+/**
+ * Interface ApiCallTypes
+ * @package hotelbeds\hotel_api_sdk\messages
+ */
 interface ApiCallTypes
 {
     const AVAILABILITY = "hotels";

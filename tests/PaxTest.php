@@ -1,6 +1,7 @@
 <?php
 
 use hotelbeds\hotel_api_sdk\model\Pax;
+use function PHPUnit\Framework\assertTrue;
 
 class PaxTest extends \PHPUnit\Framework\TestCase
 {
@@ -24,5 +25,6 @@ class PaxTest extends \PHPUnit\Framework\TestCase
     public function testJson()
     {
         fwrite(STDERR, json_encode($this->pax->toArray())."\n");
+        assertTrue(true);
     }
 }

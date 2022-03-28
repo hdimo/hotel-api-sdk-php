@@ -13,6 +13,8 @@ namespace hotelbeds\hotel_api_sdk\model;
  * @property string code Id of promotion
  * @property string name Description of promotion
  * @property string remark
+ * @property string sequence
+
  */
 class Promotion extends ApiModel
 {
@@ -21,6 +23,7 @@ class Promotion extends ApiModel
         $this->validFields = [
             "code" => "string",
             "name" => "string",
+            "sequence" => "string",
             "remark" => "string"
         ];
 

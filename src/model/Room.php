@@ -14,6 +14,10 @@ namespace hotelbeds\hotel_api_sdk\model;
  * @property integer code Code of room
  * @property string name Name of room
  * @property array rates list of all rates of this room
+ * @property array paxes
+ * @property integer id
+ * @property string supplierReference
+
  */
 class Room extends ApiModel
 {
@@ -21,8 +25,11 @@ class Room extends ApiModel
     {
         $this->validFields =
             ["code" => "integer",
-             "name" => "string",
-             "rates" => "array"];
+            "paxes" => "array",
+            "id" => "integer",
+            "supplierReference" => "string",
+            "name" => "string",
+            "rates" => "array"];
 
         if ($data !== null)
         {

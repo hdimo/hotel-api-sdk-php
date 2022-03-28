@@ -12,7 +12,9 @@ class Destination extends ApiModel
 {
     public function __construct($code=null)
     {
-        $this->validFields = [ "code" => "string", "zone" => "integer" ];
+        $this->validFields = [
+            "code" => "string",
+            "zone" => "integer" ];
         if ($code !== null)
             $this->code = $code;
     }

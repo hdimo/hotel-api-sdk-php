@@ -16,6 +16,9 @@ namespace hotelbeds\hotel_api_sdk\model;
  */
 class KeywordsFilter extends ApiModel
 {
+    /**
+     * KeywordsFilter constructor.
+     */
     public function __construct()
     {
         $this->validFields =

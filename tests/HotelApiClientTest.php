@@ -22,48 +22,44 @@
  * #L%
  */
 
-namespace hotelbeds\hotel_api_sdk\Tests;
-
-use DateTime;
-use hotelbeds\hotel_api_sdk\helpers\Availability;
-use hotelbeds\hotel_api_sdk\helpers\Booking;
-use hotelbeds\hotel_api_sdk\helpers\CheckRate;
 use hotelbeds\hotel_api_sdk\HotelApiClient;
 use hotelbeds\hotel_api_sdk\messages\BookingConfirmRS;
 use hotelbeds\hotel_api_sdk\messages\CheckRateRS;
-use hotelbeds\hotel_api_sdk\model\BookingRoom;
 use hotelbeds\hotel_api_sdk\model\Destination;
-use hotelbeds\hotel_api_sdk\model\Holder;
+use hotelbeds\hotel_api_sdk\model\Geolocation;
 use hotelbeds\hotel_api_sdk\model\Occupancy;
 use hotelbeds\hotel_api_sdk\model\Pax;
-use hotelbeds\hotel_api_sdk\model\PaymentData;
 use hotelbeds\hotel_api_sdk\model\Rate;
 use hotelbeds\hotel_api_sdk\model\Stay;
 use hotelbeds\hotel_api_sdk\types\ApiVersion;
 use hotelbeds\hotel_api_sdk\types\ApiVersions;
 use hotelbeds\hotel_api_sdk\messages\AvailabilityRS;
 use hotelbeds\hotel_api_sdk\messages\BookingListRS;
-use hotelbeds\hotel_api_sdk\types\HotelSDKException;
-use Laminas\Config\Reader\Ini;
-use PHPUnit\Framework\TestCase;
 
-class HotelApiClientTest extends TestCase
+
+class HotelApiClientTest extends PHPUnit\Framework\TestCase
 {
+    /**
+     * @var HotelApiClient
+     */
     private $apiClient;
 
     public function setUp() : void
     {
-        $reader = new Ini();
-        $config = $reader->fromFile(__DIR__ . '/HotelApiClient.ini');
-        $cfgApi = $config["apiclient"];
+        $reader = new Laminas\Config\Reader\Ini();
+        $commonConfig   = $reader->fromFile(__DIR__ . '\config\Common.ini');
+        $currentEnvironment = $commonConfig["environment"]? $commonConfig["environment"]: "DEFAULT";
+        $environmentConfig   = $reader->fromFile(__DIR__ . '\config\Environment.' . strtoupper($currentEnvironment) . '.ini');
+        $cfgApi = $commonConfig["apiclient"];
+        $cfgUrl = $environmentConfig["url"];
 
-        $this->apiClient = new HotelApiClient(
-            $cfgApi["url"],
+        $this->apiClient = new HotelApiClient($cfgUrl["default"],
             $cfgApi["apikey"],
             $cfgApi["sharedsecret"],
             new ApiVersion(ApiVersions::V1_0),
-            $cfgApi["timeout"]
-        );
+            $cfgApi["timeout"],
+            null,
+            $cfgUrl["secure"]);
     }
 
     /**
@@ -72,7 +68,7 @@ class HotelApiClientTest extends TestCase
 
     public function testStatus()
     {
-        $this->assertEquals($this->apiClient->status()->status, "OK");
+        $this->assertEquals($this->apiClient->Status()->status,"OK");
     }
 
     /**
@@ -83,21 +79,32 @@ class HotelApiClientTest extends TestCase
 
     public function testAvailRQ()
     {
-        $rqData = new Availability();
-        $rqData->stay = new Stay(
-            DateTime::createFromFormat("Y-m-d", "2022-06-01"),
-            DateTime::createFromFormat("Y-m-d", "2022-06-10"));
+        $rqData = new \hotelbeds\hotel_api_sdk\helpers\Availability();
+        $startDate = new DateTime();
+        $startDate->modify('+'.rand(1,30).' day');
+        $endDate = clone $startDate;
+        $endDate->modify('+'.rand(1,10).' day');
+        $rqData->stay = new Stay($startDate,$endDate);
 
-        $rqData->destination = new Destination("PMI");
+        //$rqData->destination = new Destination("PMI");
+        $geolocation = new Geolocation();
+        $geolocation->latitude = -32.949815300;
+        $geolocation->longitude= -60.654034800;
+        $geolocation->radius= 5.0;
+        $geolocation->unit= Geolocation::KM;
+
+        $rqData->geolocation = $geolocation;
+
+            
         $occupancy = new Occupancy();
         $occupancy->adults = 2;
         $occupancy->children = 1;
         $occupancy->rooms = 1;
 
-        $occupancy->paxes = [new Pax(Pax::AD, 30, "Miquel", "Fiol"), new Pax(Pax::AD, 27, "Margalida", "Soberats"), new Pax(Pax::CH, 8, "Josep", "Fiol")];
-        $rqData->occupancies = [$occupancy];
-        $this->assertTrue(true);
-        return $this->apiClient->availability($rqData);
+        $occupancy->paxes = [ new Pax(Pax::AD, 30, "Miquel", "Fiol"), new Pax(Pax::AD, 27, "Margalida", "Soberats"), new Pax(Pax::CH, 8, "Josep", "Fiol") ];
+        $rqData->occupancies = [ $occupancy ];
+
+        return $this->apiClient->Availability($rqData);
     }
 
     /**
@@ -115,13 +122,17 @@ class HotelApiClientTest extends TestCase
         // Check some fields of response
         // Iterate response hotels, rooms, rates...
 
-        foreach ($availRS->hotels->iterator() as $hotelCode => $hotelData) {
+        foreach ($availRS->hotels->iterator() as $hotelCode => $hotelData)
+        {
             $this->assertNotEmpty($hotelData->name);
 
-            foreach ($hotelData->iterator() as $roomCode => $roomData) {
+            foreach ($hotelData->iterator() as $roomCode => $roomData)
+            {
                 $this->assertNotEmpty($roomData->code);
+                echo $roomCode."\n";
 
-                foreach ($roomData->rateIterator() as $rateKey => $rateData) {
+                foreach($roomData->rateIterator() as $rateKey => $rateData)
+                {
                     $firstRate = $rateData;
 
                     $this->assertNotEmpty($rateData->net);
@@ -129,20 +140,23 @@ class HotelApiClientTest extends TestCase
                     $this->assertNotEmpty($rateData->boardCode);
 
                     // Check cancellation policies
-                    foreach ($rateData->cancellationPoliciesIterator() as $policyKey => $policyData) {
+                    foreach($rateData->cancellationPoliciesIterator() as $policyKey => $policyData)
+                    {
                         $this->assertNotEmpty($policyData->amount);
                         $this->assertNotEmpty($policyData->from);
                     }
 
                     // Check taxes
                     $taxes = $rateData->getTaxes();
-                    foreach ($taxes->iterator() as $tax) {
-                        //print_r($tax);
-                        //$this->assertNotEmpty($tax->type);
+                    foreach($taxes->iterator() as $tax)
+                    {
+                            //print_r($tax);
+                            //$this->assertNotEmpty($tax->type);
                     }
 
                     // Promotions
-                    foreach ($rateData->promotionsIterator() as $promoCode => $promoData) {
+                    foreach($rateData->promotionsIterator() as $promoCode => $promoData )
+                    {
                         $this->assertNotEmpty($promoData->name);
                     }
                 }
@@ -164,8 +178,8 @@ class HotelApiClientTest extends TestCase
         $this->assertNotEmpty($firstRate->rateKey);
         $this->assertRegExp("/^[0-9]{8}|[0-9]{8}/", $firstRate->rateKey);
 
-        $rqCheck = new CheckRate();
-        $rqCheck->rooms = [["rateKey" => $firstRate->rateKey]];
+        $rqCheck = new \hotelbeds\hotel_api_sdk\helpers\CheckRate();
+        $rqCheck->rooms = [ ["rateKey" => $firstRate->rateKey] ];
 
         return $this->apiClient->checkRate($rqCheck);
     }
@@ -177,7 +191,8 @@ class HotelApiClientTest extends TestCase
     public function testCheckRateRS(CheckRateRS $checkRS)
     {
         $this->assertNotEmpty($checkRS->hotel->totalNet);
-        $this->assertNotEmpty($checkRS->hotel->totalSellingRate);
+        //$this->assertNotEmpty($checkRS->hotel->totalSellingRate);
+        $this->assertNotEmpty($checkRS->hotel->currency);
     }
 
 
@@ -187,59 +202,61 @@ class HotelApiClientTest extends TestCase
 
     public function testBookingConfirm(CheckRateRS $checkRS)
     {
-        $rqBookingConfirm = new Booking();
-        $rqBookingConfirm->holder = new Holder("Tomeu TEST", "Capo TEST");
+           $rqBookingConfirm = new \hotelbeds\hotel_api_sdk\helpers\Booking();
+           $rqBookingConfirm->holder = new \hotelbeds\hotel_api_sdk\model\Holder("Tomeu TEST", "Capo TEST");
+           $rqBookingConfirm->language="CAS";
 
-        // Use this iterator for multiple pax distributions, this example have one only pax distribution.
+           // Use this iterator for multiple pax distributions, this example have one only pax distribution.
 
-        $paxes = [new Pax(Pax::AD, 30, "Miquel", "Fiol", 1), new Pax(Pax::AD, 27, "Margalida", "Soberats", 1), new Pax(Pax::CH, 8, "Josep", "Fiol", 1)];
-        $bookRooms = [];
-        $atWeb = false;
-        foreach ($checkRS->hotel->iterator() as $roomCode => $roomData) {
-            if ($roomData->rates[0]["rateType"] !== "BOOKABLE")
-                continue;
+           $paxes = [ new Pax(Pax::AD, 30, "Miquel", "Fiol",1), new Pax(Pax::AD, 27, "Margalida", "Soberats",1), new Pax(Pax::CH, 8, "Josep", "Fiol",1) ];
+           $bookRooms = [];
+           $atWeb = false;
+           foreach ($checkRS->hotel->iterator() as $roomCode => $roomData)
+           {
+               if ($roomData->rates[0]["rateType"] !== "BOOKABLE")
+                   continue;
 
-            $bookingRoom = new BookingRoom($roomData->rates[0]["rateKey"]);
-            $bookingRoom->paxes = $paxes;
-            $bookRooms[] = $bookingRoom;
+               $bookingRoom = new \hotelbeds\hotel_api_sdk\model\BookingRoom($roomData->rates[0]["rateKey"]);
+               $bookingRoom->paxes = $paxes;
+               $bookRooms[] = $bookingRoom;
 
-            $atWeb = ($roomData->rates[0]["paymentType"] === "AT_WEB");
-        }
+               $atWeb = ($roomData->rates[0]["paymentType"] === "AT_WEB");
+           }
 
-        // Check all bookable rooms are inserted for confirmation.
+           // Check all bookable rooms are inserted for confirmation.
 
-        $this->assertNotEmpty($bookRooms);
-        $rqBookingConfirm->rooms = $bookRooms;
+           $this->assertNotEmpty($bookRooms);
+           $rqBookingConfirm->rooms = $bookRooms;
 
-        // Define payment data for booking confirmation
-        $rqBookingConfirm->clientReference = "PHP_TEST_2";
-        if (!$atWeb) {
-            $rqBookingConfirm->paymentData = new PaymentData();
+           // Define payment data for booking confirmation
+           $rqBookingConfirm->clientReference = "PHP_TEST_2";
+           if (!$atWeb) {
+               $rqBookingConfirm->paymentData = new \hotelbeds\hotel_api_sdk\model\PaymentData();
 
-            $rqBookingConfirm->paymentData->paymentCard = [
-                "cardType" => "VI",
-                "cardNumber" => "4444333322221111",
-                "cardHolderName" => "AUTHORISED",
-                "expiryDate" => "0620",
-                "cardCVC" => "123"
-            ];
+               $rqBookingConfirm->paymentData->paymentCard = [
+                   "cardType" => "VI",
+                   "cardNumber" => "4444333322221111",
+                   "cardHolderName" => "AUTHORISED",
+                   "expiryDate" => "0620",
+                   "cardCVC" => "123"
+               ];
 
-            $rqBookingConfirm->paymentData->contactData = [
-                "email" => "integration@test.com",
-                "phoneNumber" => "654654654"
-            ];
-        }
+               $rqBookingConfirm->paymentData->contactData = [
+                   "email" => "integration@test.com",
+                   "phoneNumber" => "654654654"
+               ];
+           }
 
-        try {
-            $confirmRS = $this->apiClient->bookingConfirm($rqBookingConfirm);
-            return $confirmRS;
-        } catch (HotelSDKException $e) {
-            echo "\n" . $e->getMessage() . "\n";
-            echo "\n" . $this->apiClient->getLastRequest()->getContent() . "\n";
-            $this->fail($e->getMessage());
-        }
+           try {
+               $confirmRS = $this->apiClient->BookingConfirm($rqBookingConfirm);
+               return $confirmRS;
+           } catch (\hotelbeds\hotel_api_sdk\types\HotelSDKException $e) {
+               echo "\n".$e->getMessage()."\n";
+               echo "\n".$this->apiClient->getLastRequest()->getContent()."\n";
+               $this->fail($e->getMessage());
+           }
 
-        return null;
+           return null;
     }
 
     /**

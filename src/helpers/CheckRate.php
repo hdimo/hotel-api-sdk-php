@@ -11,7 +11,7 @@ namespace hotelbeds\hotel_api_sdk\helpers;
 /**
  * Class CheckRate
  * @package hotelbeds\hotel_api_sdk\helpers
- * @property array rooms List of rooms,
+ * @property array $rooms List of rooms,
  */
 
 class CheckRate extends ApiHelper

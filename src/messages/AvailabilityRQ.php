@@ -14,11 +14,15 @@ use Laminas\Http\Request;
 
 /**
  * Class AvailabilityRQ
- *
+ * @package hotelbeds\hotel_api_sdk\messages
  */
-
 class AvailabilityRQ extends ApiRequest
 {
+    /**
+     * AvailabilityRQ constructor.
+     * @param ApiUri $baseUri
+     * @param Availability $availDataRQ
+     */
     public function __construct(ApiUri $baseUri, Availability $availDataRQ)
     {
         parent::__construct($baseUri, self::AVAILABILITY);

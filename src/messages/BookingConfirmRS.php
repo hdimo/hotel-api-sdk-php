@@ -11,8 +11,16 @@ namespace hotelbeds\hotel_api_sdk\messages;
 use hotelbeds\hotel_api_sdk\model\AuditData;
 use hotelbeds\hotel_api_sdk\model\Booking;
 
+/**
+ * Class BookingConfirmRS
+ * @package hotelbeds\hotel_api_sdk\messages
+ */
 class BookingConfirmRS extends ApiResponse
 {
+    /**
+     * BookingConfirmRS constructor.
+     * @param array $rsData
+     */
     public function __construct(array $rsData)
     {
         parent::__construct($rsData);
@@ -23,6 +31,7 @@ class BookingConfirmRS extends ApiResponse
     }
 
     /**
+     * Returns an auditdata object with response auditdata
      * @return AuditData Return class of audit
      */
     public function auditData()

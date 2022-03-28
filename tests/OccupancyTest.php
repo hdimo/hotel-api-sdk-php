@@ -5,6 +5,7 @@ namespace hotelbeds\hotel_api_sdk\Tests;
 use \hotelbeds\hotel_api_sdk\model\Occupancy;
 use \hotelbeds\hotel_api_sdk\model\Pax;
 use PHPUnit\Framework\TestCase;
+use function PHPUnit\Framework\assertTrue;
 
 class OccupancyTest extends TestCase
 {
@@ -37,5 +38,6 @@ class OccupancyTest extends TestCase
     public function testJson()
     {
        fwrite(STDERR, json_encode($this->occupancy->toArray())."\n");
+        assertTrue(true);
     }
 }

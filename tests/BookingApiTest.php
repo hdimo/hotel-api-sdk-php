@@ -21,27 +21,26 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
-namespace hotelbeds\hotel_api_sdk\Tests;
 
-
-use DateTime;
 use hotelbeds\hotel_api_sdk\HotelApiClient;
 use hotelbeds\hotel_api_sdk\types\ApiVersion;
 use hotelbeds\hotel_api_sdk\types\ApiVersions;
 use hotelbeds\hotel_api_sdk\messages\BookingListRS;
-use PHPUnit\Framework\TestCase;
 
-class BookingApiTest extends TestCase
+class BookingApiTest extends PHPUnit\Framework\TestCase
 {
     private $apiClient;
 
-    public function setUp() : void
+    protected function setUp()
     {
-        $reader = new \Laminas\Config\Reader\Ini();
-        $config   = $reader->fromFile(__DIR__.'/HotelApiClient.ini');
-        $cfgApi = $config["apiclient"];
+        $reader = new Laminas\Config\Reader\Ini();
+        $commonConfig   = $reader->fromFile(__DIR__ . '/config/Common.ini');
+        $currentEnvironment = $commonConfig["environment"]? $commonConfig["environment"]: "DEFAULT";
+        $environmentConfig   = $reader->fromFile(__DIR__ . '/config/Environment.' . strtoupper($currentEnvironment) . '.ini');
+        $cfgApi = $commonConfig["apiclient"];
+        $cfgUrl = $environmentConfig["url"];
 
-        $this->apiClient = new HotelApiClient($cfgApi["url"],
+        $this->apiClient = new HotelApiClient($cfgUrl["default"],
             $cfgApi["apikey"],
             $cfgApi["sharedsecret"],
             new ApiVersion(ApiVersions::V1_0),
@@ -51,8 +50,8 @@ class BookingApiTest extends TestCase
     public function testBookingList()
     {
         $rqBookingLst = new \hotelbeds\hotel_api_sdk\helpers\BookingList();
-        $rqBookingLst->start = DateTime::createFromFormat("Y-m-d", "2016-02-01");
-        $rqBookingLst->end = DateTime::createFromFormat("Y-m-d", "2016-02-10");
+        $rqBookingLst->start = DateTime::createFromFormat("Y-m-d", "2016-04-01");
+        $rqBookingLst->end = DateTime::createFromFormat("Y-m-d", "2016-04-30");
         $rqBookingLst->from = 1;
         $rqBookingLst->to = 25;
         return $this->apiClient->bookinglist($rqBookingLst);
@@ -94,5 +93,8 @@ class BookingApiTest extends TestCase
            }
     }
 
+    protected function tearDown()
+    {
 
+    }
 }

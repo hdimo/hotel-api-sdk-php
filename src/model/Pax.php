@@ -9,7 +9,7 @@
 namespace hotelbeds\hotel_api_sdk\model;
 
 /**
- * Class Pax
+ * Class Pax. Declare passenger data.
  * @package hotelbeds\hotel_api_sdk\model
  * @property integer roomId
  * @property string type Pax type. Two values are permitted for the attribute: AD for adult y CH
@@ -22,6 +22,14 @@ class Pax extends ApiModel
     const AD = 'AD';
     const CH = 'CH';
 
+    /**
+     * Pax constructor.
+     * @param string $type Type of passenger: AD or CH
+     * @param int $age Age of passenger
+     * @param string|null $name Name of passenger
+     * @param string|null $surname Surname
+     * @param string|null $roomId Room ID
+     */
     public function __construct($type=self::AD, $age=30, $name=null, $surname=null, $roomId=null)
     {
         $this->validFields =

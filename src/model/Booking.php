@@ -15,18 +15,30 @@ namespace hotelbeds\hotel_api_sdk\model;
  */
 class Booking extends ApiModel
 {
+    /**
+     * Booking constructor.
+     * @param array|null $data
+     */
     public function __construct(array $data=null)
     {
         $this->validFields = [
             "reference" => "string",
+            "cancellationReference" => "string",
+            "clientReference" => "string",
+            "modificationPolicies" => "array",
             "creationDate" => "string",
-            "totalAmount" => "float",
+            "creationUser" => "string",
+            "totalNet" => "double",
+            "totalSellingRate" => "double",
+            "pendingAmount" => "double",
             "currency" => "string",
-            "status" => "string",
+            "status" => "array",
             "holder" => "array",
-            "commisionVAT" => "float",
+            "commisionVAT" => "double",
+            "agCommision" => "double",
             "remark" => "string",
-            "hotel" => "array"
+            "hotel" => "array",
+            "invoiceCompany" => "array"
         ];
 
         if ($data !== null)

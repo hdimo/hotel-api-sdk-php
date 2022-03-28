@@ -12,6 +12,7 @@ namespace hotelbeds\hotel_api_sdk\Tests;
 use DateTime;
 use hotelbeds\hotel_api_sdk\model\Stay;
 use PHPUnit\Framework\TestCase;
+use function PHPUnit\Framework\assertTrue;
 
 
 class StayTest extends TestCase
@@ -53,5 +54,6 @@ class StayTest extends TestCase
     public function testJson()
     {
         fwrite(STDERR, json_encode($this->stay->toArray())."\n");
+        assertTrue(true);
     }
 }

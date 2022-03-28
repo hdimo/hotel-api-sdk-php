@@ -10,7 +10,7 @@ namespace hotelbeds\hotel_api_sdk\messages;
 
 use hotelbeds\hotel_api_sdk\types\ApiUri;
 use hotelbeds\hotel_api_sdk\helpers\Availability;
-use Zend\Http\Request;
+use Laminas\Http\Request;
 
 /**
  * Class AvailabilityRQ

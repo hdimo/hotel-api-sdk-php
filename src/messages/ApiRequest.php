@@ -10,9 +10,9 @@ namespace hotelbeds\hotel_api_sdk\messages;
 
 use hotelbeds\hotel_api_sdk\helpers\ApiHelper;
 use hotelbeds\hotel_api_sdk\types\ApiUri;
-use Zend\Http\Request;
-use Zend\Uri\Http;
-use Zend\Stdlib\Parameters;
+use Laminas\Http\Request;
+use Laminas\Uri\Http;
+use Laminas\Stdlib\Parameters;
 
 abstract class ApiRequest implements ApiCallTypes
 {

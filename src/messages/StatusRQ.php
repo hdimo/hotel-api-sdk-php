@@ -9,7 +9,7 @@
 namespace hotelbeds\hotel_api_sdk\messages;
 
 use hotelbeds\hotel_api_sdk\types\ApiUri;
-use Zend\Http\Request;
+use Laminas\Http\Request;
 
 class StatusRQ extends ApiRequest
 {

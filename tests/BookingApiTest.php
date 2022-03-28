@@ -21,19 +21,23 @@
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
+namespace hotelbeds\hotel_api_sdk\Tests;
 
+
+use DateTime;
 use hotelbeds\hotel_api_sdk\HotelApiClient;
 use hotelbeds\hotel_api_sdk\types\ApiVersion;
 use hotelbeds\hotel_api_sdk\types\ApiVersions;
 use hotelbeds\hotel_api_sdk\messages\BookingListRS;
+use PHPUnit\Framework\TestCase;
 
-class BookingApiTest extends PHPUnit_Framework_TestCase
+class BookingApiTest extends TestCase
 {
     private $apiClient;
 
-    protected function setUp()
+    public function setUp() : void
     {
-        $reader = new Zend\Config\Reader\Ini();
+        $reader = new \Laminas\Config\Reader\Ini();
         $config   = $reader->fromFile(__DIR__.'/HotelApiClient.ini');
         $cfgApi = $config["apiclient"];
 
@@ -90,8 +94,5 @@ class BookingApiTest extends PHPUnit_Framework_TestCase
            }
     }
 
-    protected function tearDown()
-    {
 
-    }
 }

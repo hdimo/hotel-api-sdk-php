@@ -9,7 +9,7 @@
 namespace hotelbeds\hotel_api_sdk\helpers;
 
 use hotelbeds\hotel_api_sdk\generic\DataContainer;
-use Zend\Json\Json;
+use Laminas\Json\Json;
 
 abstract class ApiHelper extends DataContainer
 {

@@ -7,18 +7,25 @@
  * Time: 9:41 PM
  */
 
-class StayTest extends PHPUnit_Framework_TestCase
+namespace hotelbeds\hotel_api_sdk\Tests;
+
+use DateTime;
+use hotelbeds\hotel_api_sdk\model\Stay;
+use PHPUnit\Framework\TestCase;
+
+
+class StayTest extends TestCase
 {
     private $stay;
-    protected function setUp()
+    public function setUp() : void
     {
-        $this->stay = new \hotelbeds\hotel_api_sdk\model\Stay();
+        $this->stay = new Stay();
 
         $dateIn = DateTime::createFromFormat("Y-m-d", date("Y-m-d"));
-        $dateOut = DateTime::createFromFormat("Y-m-d", date("Y-m-d"));;
+        $dateOut = DateTime::createFromFormat("Y-m-d", date("Y-m-d"));
 
         $this->stay->checkIn = $dateIn;
-        $this->stay->checkOut = $dateOut->add(new DateInterval('P2W'));
+        $this->stay->checkOut = $dateOut->add(new \DateInterval('P2W'));
         $this->stay->shiftDays = 1;
         $this->stay->allowOnlyShift = false;
     }
@@ -33,7 +40,7 @@ class StayTest extends PHPUnit_Framework_TestCase
     {
         $dateIn = DateTime::createFromFormat("Y-m-d", date("Y-m-d"));
         $dateOut =  DateTime::createFromFormat("Y-m-d", date("Y-m-d"));
-        $dateOut->add(new DateInterval('P2W'));
+        $dateOut->add(new \DateInterval('P2W'));
 
         $this->assertEquals($this->stay->checkIn->getTimestamp(), $dateIn->getTimestamp());
         $this->assertEquals($this->stay->checkOut->getTimestamp(), $dateOut->getTimestamp());

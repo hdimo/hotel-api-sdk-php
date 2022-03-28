@@ -35,9 +35,9 @@ use hotelbeds\hotel_api_sdk\types\ApiVersion;
 use hotelbeds\hotel_api_sdk\types\HotelSDKException;
 use hotelbeds\hotel_api_sdk\messages\ApiRequest;
 
-use Zend\Http\Client;
-use Zend\Http\Request;
-use Zend\Uri\UriFactory;
+use Laminas\Http\Client;
+use Laminas\Http\Request;
+use Laminas\Uri\UriFactory;
 
 /**
  * Class HotelApiClient
@@ -86,7 +86,8 @@ class HotelApiClient
         if (!class_exists($sdkClassRQ) && !class_exists($sdkClassRS))
             throw new \Exception("$sdkClassRQ or $sdkClassRS not implemented in SDK");
 
-        if ($args !== null)
+
+        if ($args !== null && count($args) > 0)
             $req = new $sdkClassRQ($this->apiUri, $args[0]);
         else $req = new $sdkClassRQ($this->apiUri);
 
@@ -115,14 +116,14 @@ class HotelApiClient
         if ($response->getStatusCode() !== 200) {
            $auditData = null;$message="";
            if ($response->getBody() !== null) {
-                $errorResponse = \Zend\Json\Json::decode($response->getBody(), \Zend\Json\Json::TYPE_ARRAY);
+                $errorResponse = \Laminas\Json\Json::decode($response->getBody(), \Laminas\Json\Json::TYPE_ARRAY);
                 $auditData = new AuditData($errorResponse["auditData"]);
                 $message = $errorResponse["error"]["message"];
            }
            throw new HotelSDKException($response->getReasonPhrase().". ".$message, $auditData);
         }
 
-        return \Zend\Json\Json::decode($response->getBody(), \Zend\Json\Json::TYPE_ARRAY);
+        return \Laminas\Json\Json::decode($response->getBody(), \Laminas\Json\Json::TYPE_ARRAY);
     }
 
     /**
